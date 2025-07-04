@@ -13,11 +13,12 @@
             flex-direction: column;
             align-items: center;
             background-color: #f0f0f0;
+            overflow-x: hidden; /* Ngăn chặn tràn màn hình theo chiều ngang */
         }
 
         .control-panel {
             width: 100%;
-            max-width: 500px;
+            max-width: 100%;
             display: flex;
             justify-content: space-between; /* Đảm bảo khoảng cách đều giữa 2 cột */
             border: 2px solid #ccc;  /* Thêm viền bao quanh */
@@ -26,6 +27,8 @@
             background-color: #fff;
             gap: 20px; /* Khoảng cách giữa các cột */
             transition: background-color 0.5s; /* Hiệu ứng chuyển đổi màu nền */
+            box-sizing: border-box; /* Đảm bảo tính toán padding vào chiều rộng */
+            overflow-x: auto; /* Cho phép cuộn ngang nếu nội dung vượt quá */
         }
 
         .button-row, .input-group {
@@ -36,7 +39,7 @@
         }
 
         button {
-            padding: 15px 30px;
+            padding: 15px 20px;
             font-size: 16px;
             border: none;
             border-radius: 5px;
@@ -63,6 +66,8 @@
             background-color: #4a69bd;
             color: white;
             text-align: center;
+            width: 100%; /* Đảm bảo ô nhập có chiều rộng đầy đủ */
+            box-sizing: border-box; /* Bao gồm padding vào trong chiều rộng */
         }
         
 
@@ -79,6 +84,7 @@
             border-radius: 5px;
             cursor: not-allowed;
             opacity: 0.7;
+            width: 100%; /* Đảm bảo nút SET chiếm chiều rộng đầy đủ */
         }
 
         #setBtn.active {
@@ -112,7 +118,7 @@
     top: 50%; /* Đưa modal vào giữa theo chiều dọc */
     transform: translate(-50%, -50%); /* Đẩy modal về chính giữa cả chiều ngang và chiều dọc */
     width: 100%;
-    max-width: 330px; /* Giảm chiều rộng modal xuống 2/3 so với trước (500px) */
+    max-width: 90%;
     background-color: rgba(0, 0, 0, 0.4); /* Màu nền mờ */
 }
 
@@ -124,6 +130,7 @@
     text-align: center;
     width: 100%;
     max-width: 330px; /* Đặt chiều rộng của modal nội dung bằng với modal */
+    margin: 0 auto;
 }
 
 /* Các nút trong modal */
