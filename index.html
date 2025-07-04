@@ -329,36 +329,11 @@ window.addEventListener('click', (event) => {
 function updateControlPanelColor(valueStatus) {
     const controlPanel = document.getElementById('controlPanel');
     const statusMessage = document.getElementById('statusMessage');
-    if (valueStatus === 3591) {
+    if (valueStatus === 1) {
         controlPanel.style.backgroundColor = '#CCEBC5'; // Màu xanh khi valueStatus = 1
         statusMessage.textContent = 'ĐANG CHẠY'; // Hiển thị "ĐANG CHẠY" khi hệ thống chạy
         statusMessage.style.color = '#16A34A'; // Màu xanh cho trạng thái đang chạy
     } 
-    
-    else if (valueStatus === 2567) {
-        statusMessage.textContent = 'ĐANG CHẠY'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
-        statusMessage.style.color = '#e67e22'; // Màu cam cho trạng thái dừng
-        controlPanel.style.backgroundColor = '#F6E8C3'; // Màu vàng khi valueStatus = 2
-    } 
-
-    else if (valueStatus === 3847) {
-        statusMessage.textContent = 'ĐANG CHẠY'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
-        statusMessage.style.color = '#16A34A'; // Màu cam cho trạng thái dừng
-        controlPanel.style.backgroundColor = '#F6E8C3'; // Màu vàng khi valueStatus = 2
-    }
-    
-    else if (valueStatus === 2823) {
-        statusMessage.textContent = 'ĐANG CHẠY'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
-        statusMessage.style.color = '#e67e22'; // Màu cam cho trạng thái dừng
-        controlPanel.style.backgroundColor = '#F6E8C3'; // Màu vàng khi valueStatus = 2
-    }
-
-    else if (valueStatus === 519) {
-        statusMessage.textContent = 'ĐANG DỪNG'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
-        statusMessage.style.color = 'RED'; // Màu cam cho trạng thái dừng
-        controlPanel.style.backgroundColor = '#FDE0DD'; // Màu đỏ nhạt khi valueStatus = 3
-    } 
-
     else {
         statusMessage.textContent = 'ĐANG DỪNG'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
         statusMessage.style.color = 'RED'; // Màu cam cho trạng thái dừng
