@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .control-panel {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: space-between; /* Đảm bảo khoảng cách đều giữa 2 cột */
+            border: 2px solid #ccc;  /* Thêm viền bao quanh */
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #fff;
+            gap: 20px; /* Khoảng cách giữa các cột */
+            transition: background-color 0.5s; /* Hiệu ứng chuyển đổi màu nền */
+        }
+
+        .button-row, .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;  /* Đảm bảo 2 cột chiếm không gian ngang bằng nhau */
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%; /* Mở rộng chiều rộng nút để phù hợp với cột */
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        #startBtn {
+            background-color: #2ecc71;
+        }
+
+        #stopBtn {
+            background-color: #e67e22;
+        }
+
+        input {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #4a69bd;
+            color: white;
+            text-align: center;
+        }
+        
+
+        input::placeholder {
+            color: #ddd;
+        }
+
+        #setBtn {
+            padding: 15px;
+            background-color: #88c5c9;
+            color: rgb(52, 50, 50);
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        #setBtn.active {
+            background-color: #71a2d3;
+            cursor: pointer;
+            opacity: 1;
+        }
+
+        button:active {
+            transform: scale(0.92);
+        }
+
+        /* Thêm màu chữ đỏ cho ô nhập khi có lỗi */
+        input.error {
+            background-color: #d75a5a; /* Có thể thay đổi màu nền nếu muốn */
+        }
+
+        /* Khi giá trị hợp lệ, màu chữ trở lại bình thường */
+        input:valid {
+            color: white;
+            /* background-color: #4a69bd; */
+        }
+
+
+/* Modal */
+.modal {
+    display: none; /* Ẩn modal theo mặc định */
+    position: fixed;
+    z-index: 1; /* Đảm bảo modal nằm trên cùng */
+    left: 50%; /* Đưa modal vào giữa theo chiều ngang */
+    top: 50%; /* Đưa modal vào giữa theo chiều dọc */
+    transform: translate(-50%, -50%); /* Đẩy modal về chính giữa cả chiều ngang và chiều dọc */
+    width: 100%;
+    max-width: 330px; /* Giảm chiều rộng modal xuống 2/3 so với trước (500px) */
+    background-color: rgba(0, 0, 0, 0.4); /* Màu nền mờ */
+}
+
+/* Nội dung modal */
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 100%;
+    max-width: 330px; /* Đặt chiều rộng của modal nội dung bằng với modal */
+}
+
+/* Các nút trong modal */
+.modal button {
+    width: auto; /* Nút trong modal có chiều rộng tự động */
+    padding: 10px 20px; /* Điều chỉnh padding cho nút trong modal */
+    margin: 10px 0; /* Khoảng cách giữa các nút trong modal */
+}
+
+#confirmBtn {
+    background-color: #2ecc71; /* Màu xanh cho nút xác nhận */
+    color: white;
+}
+
+#cancelBtn {
+    background-color: #e74c3c; /* Màu đỏ cho nút hủy bỏ */
+    color: white;
+}
+
+#confirmBtn:hover, #cancelBtn:hover {
+    opacity: 0.8; /* Hiệu ứng khi hover */
+}
+    </style>
+</head>
+<body>
+    <div id="statusMessage" style="font-size: 18px; font-weight: bold; margin-bottom: 10px;"></div> <!-- Trạng thái -->
+    <div class="control-panel"  id="controlPanel">
+        <div class="button-row">
+            <button id="startBtn">Chạy</button>
+            <button id="stopBtn">Dừng</button>
+        </div>
+        <div class="input-group">
+            <input type="text" id="setpointInput" placeholder="Nhập setpoint (bar)">
+            <button id="setBtn">SET</button>
+        </div>
+    </div>
+
+     <!-- Modal Xác nhận -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h2>Xác nhận</h2>
+            <button id="confirmBtn">OK</button>
+            <button id="cancelBtn">Cancel</button>
+        </div>
+    </div>
+
+
+    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
+    <script>
+        let actionRUN = null, actionSTOP = null, actionREF = null, statusWord = null;
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const setpointInput = document.getElementById('setpointInput');
+        const setBtn = document.getElementById('setBtn');
+
+        const confirmationModal = document.getElementById('confirmationModal');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        let actionToConfirm = null; // Biến để lưu hành động cần xác nhận
+
+
+        const eraWidget = new EraWidget();  
+
+        setpointInput.addEventListener('input', function(event) {
+            const currentValue = setpointInput.value;
+
+            // Loại bỏ các ký tự không phải số (bao gồm dấu chấm thập phân)
+            setpointInput.value = currentValue.replace(/[^0-9\.]/g, '');
+
+            // Giới hạn tối đa 2 chữ số sau dấu thập phân
+            if (setpointInput.value.split('.').length > 2) {
+                setpointInput.value = setpointInput.value.substring(0, setpointInput.value.lastIndexOf('.'));
+            }
+        });
+        // Thêm hàm format giá trị với đơn vị bar
+        function formatValue(value) {
+            return value ? value + ' bar' : '';
+        }
+
+        // Hàm để lấy giá trị số từ chuỗi có đơn vị
+        function getNumericValue(value) {
+            return value.replace(' bar', '');
+        }
+
+        // Cập nhật giá trị hiển thị khi focus vào input
+        setpointInput.addEventListener('focus', () => {
+            const currentValue = setpointInput.value;
+            setpointInput.value = getNumericValue(currentValue);
+        });
+
+        // Cập nhật giá trị hiển thị khi blur khỏi input
+        setpointInput.addEventListener('blur', () => {
+            const currentValue = setpointInput.value;
+            if (currentValue && !isNaN(parseFloat(currentValue))) {
+                setpointInput.value = formatValue(currentValue);
+            }
+        });
+
+        eraWidget.init({
+        needActions: true,
+        needConfigs: true,
+        mobileHeight: 230,
+
+        onConfiguration: (config) => {
+            statusWord = config.realtime_configs[0];
+            actionRUN = config.actions[0];
+            actionSTOP = config.actions[1];
+            actionREF = config.actions[2];
+        },
+        onValues: (values) => {
+           const valueStatus = values[statusWord.id].value;
+           updateControlPanelColor(valueStatus);
+        }
+        });
+
+        // Mở modal khi nhấn bất kỳ nút nào
+        startBtn.addEventListener('click', () => {
+            actionToConfirm = 'start';
+            confirmationModal.style.display = 'block';
+        });
+        stopBtn.addEventListener('click', () => {
+            actionToConfirm = 'stop';
+            confirmationModal.style.display = 'block';
+        });
+
+        
+
+        // Xử lý validate input
+        setpointInput.addEventListener('input', validateInput);
+
+        function validateInput() {
+    const rawValue = getNumericValue(setpointInput.value);
+    const numberValue = parseFloat(rawValue);
+
+    // Kiểm tra các điều kiện
+    const isValid = 
+            rawValue !== "" && // Kiểm tra ô nhập không trống
+            !isNaN(numberValue) && // Là số
+            numberValue >= 0 && // Lớn hơn hoặc bằng 0
+            numberValue <= 10 && // Nhỏ hơn hoặc bằng 10
+            /^\d*\.?\d{0,2}$/.test(rawValue); // Tối đa 2 số sau dấu thập phân
+
+        if (isValid) {
+            setBtn.classList.add('active');
+            setBtn.disabled = false; // Kích hoạt nút SET khi giá trị hợp lệ
+            setpointInput.classList.remove('error'); // Xóa màu đỏ khi nhập đúng
+        } else {
+            setBtn.classList.remove('active');
+            setBtn.disabled = true; // Vô hiệu hóa nút SET khi nhập không hợp lệ hoặc ô trống
+            setpointInput.classList.add('error'); // Thêm màu đỏ khi nhập sai
+        }
+    }
+
+        setBtn.addEventListener('click', () => {
+            actionToConfirm = 'set';
+            confirmationModal.style.display = 'block';
+        });
+
+
+        // Xử lý xác nhận hành động
+confirmBtn.addEventListener('click', () => {
+    switch(actionToConfirm) {
+        case 'start':
+            eraWidget.triggerAction(actionRUN.action, null); // Gọi action RUN
+            console.log('Hệ thống đang chạy');
+            break;
+        case 'stop':
+            eraWidget.triggerAction(actionSTOP.action, null); // Gọi action STOP
+            console.log('Hệ thống đã dừng');
+            break;
+        case 'set':
+            const rawValue = getNumericValue(setpointInput.value);
+            const setpoint = parseFloat(rawValue);
+            eraWidget.triggerAction(actionREF.action, null, { value: setpoint * 1000 });
+            console.log('Setpoint đã được cài đặt:', setpoint);
+            break;
+    }
+
+    confirmationModal.style.display = 'none'; // Đóng modal sau khi xác nhận
+});
+
+// Xử lý hủy bỏ hành động
+cancelBtn.addEventListener('click', () => {
+    confirmationModal.style.display = 'none'; // Đóng modal khi hủy bỏ
+});
+
+// Đóng modal khi nhấn ngoài modal (bên ngoài nội dung modal)
+window.addEventListener('click', (event) => {
+    if (event.target === confirmationModal) {
+        confirmationModal.style.display = 'none';
+    }
+});
+
+// Hàm cập nhật màu nền của control-panel
+function updateControlPanelColor(valueStatus) {
+    const controlPanel = document.getElementById('controlPanel');
+    const statusMessage = document.getElementById('statusMessage');
+    if (valueStatus === 3591) {
+        controlPanel.style.backgroundColor = '#CCEBC5'; // Màu xanh khi valueStatus = 1
+        statusMessage.textContent = 'ĐANG CHẠY'; // Hiển thị "ĐANG CHẠY" khi hệ thống chạy
+        statusMessage.style.color = '#16A34A'; // Màu xanh cho trạng thái đang chạy
+    } 
+    
+    else if (valueStatus === 2567) {
+        statusMessage.textContent = 'ĐANG CHẠY'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
+        statusMessage.style.color = '#e67e22'; // Màu cam cho trạng thái dừng
+        controlPanel.style.backgroundColor = '#F6E8C3'; // Màu vàng khi valueStatus = 2
+    } 
+
+    else if (valueStatus === 519) {
+        statusMessage.textContent = 'ĐANG DỪNG'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
+        statusMessage.style.color = 'RED'; // Màu cam cho trạng thái dừng
+        controlPanel.style.backgroundColor = '#FDE0DD'; // Màu đỏ nhạt khi valueStatus = 3
+    } 
+
+    else {
+        statusMessage.textContent = 'ĐANG DỪNG'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
+        statusMessage.style.color = 'RED'; // Màu cam cho trạng thái dừng
+        controlPanel.style.backgroundColor = '#f0f0f0'; // Màu mặc định nếu không có giá trị này
+    }
+}
+
+
+        // Đảm bảo nút SET bị vô hiệu hóa khi trang tải
+    document.addEventListener("DOMContentLoaded", function() {
+        setBtn.disabled = true; // Vô hiệu hóa nút SET khi trang được tải
+        setBtn.classList.remove('active');
+    });
+    </script>
+</body>
+</html>
