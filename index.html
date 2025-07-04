@@ -341,6 +341,12 @@ function updateControlPanelColor(valueStatus) {
         controlPanel.style.backgroundColor = '#F6E8C3'; // Màu vàng khi valueStatus = 2
     } 
 
+    else if (valueStatus === 3847) {
+        statusMessage.textContent = 'ĐANG CHẠY'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
+        statusMessage.style.color = '#e67e22'; // Màu cam cho trạng thái dừng
+        controlPanel.style.backgroundColor = '#F6E8C3'; // Màu vàng khi valueStatus = 2
+    } 
+
     else if (valueStatus === 519) {
         statusMessage.textContent = 'ĐANG DỪNG'; // Hiển thị "HỆ THỐNG DỪNG" khi hệ thống dừng
         statusMessage.style.color = 'RED'; // Màu cam cho trạng thái dừng
