@@ -180,7 +180,7 @@
 
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
-        let actionRUN = null, actionSTOP = null, actionREF = null, statusWord = null;
+        let actionRUN = null, actionSTOP = null, actionREF = null, statusWord = null, actionSave = null;
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
         const setpointInput = document.getElementById('setpointInput');
@@ -191,7 +191,7 @@
         const cancelBtn = document.getElementById('cancelBtn');
 
         let actionToConfirm = null; // Biến để lưu hành động cần xác nhận
-
+        let hasSavedOnce = false; // Biến cờ kiểm tra đã ghi chưa
 
         const eraWidget = new EraWidget();  
 
@@ -240,10 +240,17 @@
             actionRUN = config.actions[0];
             actionSTOP = config.actions[1];
             actionREF = config.actions[2];
+            actionSave = config.actions[3];
         },
         onValues: (values) => {
            const valueStatus = values[statusWord.id].value;
            updateControlPanelColor(valueStatus);
+            // Kiểm tra và ghi 1 lần duy nhất
+            if (!hasSavedOnce && valueStatus !== undefined) {
+                hasSavedOnce = true;
+                eraWidget.triggerAction(actionSave.action, null);
+                console.log('actionSave đã được gửi 1 lần với giá trị 1');
+            }
         }
         });
 
