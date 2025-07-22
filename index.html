@@ -243,15 +243,9 @@
             actionSave = config.actions[3];
         },
         onValues: (values) => {
-           const valueStatus = values[statusWord.id].value;
-           updateControlPanelColor(valueStatus);
-            // Kiểm tra và ghi 1 lần duy nhất
-            if (!hasSavedOnce && valueStatus !== undefined) {
-                hasSavedOnce = true;
-               // eraWidget.triggerAction(actionSave.action, null);
-                console.log('actionSave đã được gửi 1 lần với giá trị 1');
+               const valueStatus = values[statusWord.id].value;
+               updateControlPanelColor(valueStatus);
             }
-        }
         });
 
         // Mở modal khi nhấn bất kỳ nút nào
@@ -310,10 +304,22 @@ confirmBtn.addEventListener('click', () => {
             console.log('Hệ thống đã dừng');
             break;
         case 'set':
+            // const rawValue = getNumericValue(setpointInput.value);
+            // const setpoint = parseFloat(rawValue);
+            // eraWidget.triggerAction(actionREF.action, null, { value: setpoint * 1000 });
+            // console.log('Setpoint đã được cài đặt:', setpoint);
+            // break;
             const rawValue = getNumericValue(setpointInput.value);
             const setpoint = parseFloat(rawValue);
-            eraWidget.triggerAction(actionREF.action, null, { value: setpoint * 1000 });
-            console.log('Setpoint đã được cài đặt:', setpoint);
+
+            // Gửi actionSave trước
+            eraWidget.triggerAction(actionSave?.action, null);
+            // console.log('Đã gửi actionSave trước khi gửi setpoint');
+            // Sau 2 giây mới gửi actionREF (giá trị setpoint)
+            setTimeout(() => {
+                eraWidget.triggerAction(actionREF.action, null, { value: setpoint * 1000 });
+                // console.log('Setpoint đã được cài đặt:', setpoint);
+            }, 2000);
             break;
     }
 
